@@ -7,7 +7,7 @@ theta = 30 * np.pi / 180  # Half of the total opening angle (in radians)
 velocity = 1.0  # Unit velocity
 n_periods = 10  # Number of periods to simulate
 unit_length = 1.0  # Define the region of observation as unit length
-output_folder = "simulation_data_updated"  # Folder to store the output files
+output_folder = "sim_data"  # Folder to store the output files
 np.random.seed(42)
 
 # Gravitational constant and central mass
@@ -17,13 +17,6 @@ c = 0.01  # Constant force magnitude
 
 # Create the output folder if it doesn't exist
 os.makedirs(output_folder, exist_ok=True)
-
-# Function to check if a point is inside a triangular region
-def in_triangle(x, y, left=True):
-    if left:
-        return x <= 0 and np.abs(y) <= -x * np.tan(theta)
-    else:
-        return x >= 0 and np.abs(y) <= x * np.tan(theta)
 
 # Function to calculate orbital period based on initial distance
 def calculate_orbital_period(distance, M):
@@ -38,7 +31,7 @@ def constant_force(reb_sim):
 # Function to run a single simulation
 def run_simulation(simulation_number):
     sim = rebound.Simulation()
-    sim.integrator = "whfast"  # Fast integrator for test particles
+    sim.integrator = "ias15"  # integrator for test particles
     sim.dt = 0.001  # Small timestep
 
     # Add the massive stationary particle at the center
@@ -46,16 +39,21 @@ def run_simulation(simulation_number):
 
     # Add the small particle with random initial conditions
     initial_distance = np.random.uniform(0.0, unit_length)
-    initial_angle = np.random.uniform(0, 2 * np.pi)
-    x = initial_distance * np.cos(initial_angle)
-    y = initial_distance * np.sin(initial_angle)
+    theta = np.random.uniform(0, 2 * np.pi)  # Polar angle
+    phi = np.random.uniform(0, np.pi)  # Azimuthal angle
+    x = initial_distance * np.sin(phi) * np.cos(theta)
+    y = initial_distance * np.sin(phi) * np.sin(theta)
+    z = initial_distance * np.cos(phi)
 
-    velocity_angle = np.random.uniform(0, 2 * np.pi)  # Random velocity direction
-    vx = velocity * np.cos(velocity_angle)
-    vy = velocity * np.sin(velocity_angle)
+
+    velocity_angle_theta = np.random.uniform(0, 2 * np.pi)  # Random velocity direction
+    velocity_angle_phi = np.random.uniform(0, np.pi)
+    vx = velocity * np.sin(velocity_angle_phi) * np.cos(velocity_angle_theta)
+    vy = velocity * np.sin(velocity_angle_phi) * np.sin(velocity_angle_theta)
+    vz = velocity * np.cos(velocity_angle_phi)
 
     # Add the small particle as a test particle (mass=0)
-    sim.add(x=x, y=y, vx=vx, vy=vy)  # Mass is 0 by default for test particles
+    sim.add(x=x, y=y,z=z, vx=vx, vy=vy, vz=vz)  # Mass is 0 by default for test particles
 
     # Set N_active to ensure only the central mass influences the test particles
     sim.N_active = 1  # Only the central mass is active
@@ -66,7 +64,7 @@ def run_simulation(simulation_number):
 
     # Add the additional force to the simulation
     sim.additional_forces = 0
-
+    
     left_time_count = 0
     right_time_count = 0
 
@@ -77,35 +75,14 @@ def run_simulation(simulation_number):
         f.write("Time step, x, y, vx, vy\n")
         while sim.t < total_time:
             sim.integrate(sim.t + sim.dt)  # Integrate simulation
-            x, y = sim.particles[1].x, sim.particles[1].y
-            vx, vy = sim.particles[1].vx, sim.particles[1].vy
+            x, y, z = sim.particles[1].x, sim.particles[1].y, sim.particles[1].z
+            vx, vy = sim.particles[1].vx, sim.particles[1].vy, sim.particles[1].vz
 
             # Record the position and velocity every 10 time steps
-            f.write(f"{sim.t:.6f}, {x:.6f}, {y:.6f}, {vx:.6f}, {vy:.6f}\n")
-
-            # Check if the particle is inside the left or right triangular region
-            if in_triangle(x, y, left=True):
-                left_time_count += 1
-            elif in_triangle(x, y, left=False):
-                right_time_count += 1
-
-    left_cone_probability = left_time_count / (total_time / sim.dt)
-    right_cone_probability = right_time_count / (total_time / sim.dt)
-    return left_cone_probability, right_cone_probability
+            f.write(f"{sim.t:.6f}, {x:.6f}, {y:.6f}, {z:.6f}, {vx:.6f}, {vy:.6f}, {vz:.6f}\n")
 
 # Running the simulation 100 times with test particles
 n_simulations = 100
-left_probabilities = []
-right_probabilities = []
 
 for simulation_number in range(1, n_simulations + 1):
-    left_prob, right_prob = run_simulation(simulation_number)
-    left_probabilities.append(left_prob)
-    right_probabilities.append(right_prob)
-
-# Calculate average probabilities
-average_left_prob = np.mean(left_probabilities)
-average_right_prob = np.mean(right_probabilities)
-
-print(f"Average probability of the particle being in the left cone: {average_left_prob:.3f}")
-print(f"Average probability of the particle being in the right cone: {average_right_prob:.3f}")
+    run_simulation(simulation_number)
