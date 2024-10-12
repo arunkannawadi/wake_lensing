@@ -1,4 +1,3 @@
-from typing import Self
 from scipy.special import gammaincc
 from ._base_profile import MassProfile
 
@@ -35,6 +34,6 @@ class EinastoProfile(MassProfile):
             raise ValueError("Alpha has to be a positive value.")
         self._n = value
 
-    def __call__(self: Self, r: float) -> float:
+    def __call__(self, r: float) -> float:
         s = 2.*self.n
         return gammaincc(3*self.n, s**1./self.n)
