@@ -1,4 +1,4 @@
-from ._base_profile import MassProfile
+from . import MassProfile
 
 __all__ = (
     "UniformDensityMassProfile",
