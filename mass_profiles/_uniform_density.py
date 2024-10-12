@@ -14,5 +14,8 @@ class UniformDensityMassProfile(MassProfile):
         Radius containing all of the mass.
     """
 
+    def __init__(self, *, r_s: float):
+        self.r_s = r_s
+
     def __call__(self, r):
         return (r/self.r_s)**3
