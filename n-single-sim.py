@@ -57,7 +57,7 @@ def run_simulation_with_particles(n_particles):
         vy = velocity * np.sin(velocity_angle_phi) * np.sin(velocity_angle_theta)
         vz = velocity * np.cos(velocity_angle_phi)
 
-        
+
         sim.add(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz)  # Mass is 0 by default for test particles
 
         # Calculate the orbital period for this particle
