@@ -69,7 +69,7 @@ def run_simulation_with_particles(n_particles):
 
     # Add the additional force to the simulation
     radial_force = RadialForce(M=M)
-    radial_force.mass_profile = UniformDensityMassProfile(r_h=100000.)
+    radial_force.mass_profile = UniformDensityMassProfile(r_s=100000.)
     sim.additional_forces = radial_force
 
     # Define the total simulation time based on the longest orbital period
