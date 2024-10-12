@@ -1,9 +1,12 @@
 """Collection of radial forces that can be used in rebound simulations."""
 
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 import numpy as np
 
-from .mass_profiles import MassProfile
+if TYPE_CHECKING:
+    from .mass_profiles._base_profile import MassProfile
+
+
 __all__ = (
     "RadialForce",
 )
