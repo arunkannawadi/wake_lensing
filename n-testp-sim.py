@@ -76,13 +76,15 @@ def run_simulation(simulation_number):
         while sim.t < total_time:
             sim.integrate(sim.t + sim.dt)  # Integrate simulation
             x, y, z = sim.particles[1].x, sim.particles[1].y, sim.particles[1].z
-            vx, vy = sim.particles[1].vx, sim.particles[1].vy, sim.particles[1].vz
+            vx, vy, vz = sim.particles[1].vx, sim.particles[1].vy, sim.particles[1].vz
 
             # Record the position and velocity every 10 time steps
             f.write(f"{sim.t:.6f}, {x:.6f}, {y:.6f}, {z:.6f}, {vx:.6f}, {vy:.6f}, {vz:.6f}\n")
 
 # Running the simulation 100 times with test particles
-n_simulations = 100
+n_simulations = 10
 
 for simulation_number in range(1, n_simulations + 1):
     run_simulation(simulation_number)
+
+print("Simulations completed!")

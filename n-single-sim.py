@@ -76,10 +76,16 @@ def run_simulation_with_particles(n_particles):
 
     with open(output_file, "w") as f:
         f.write("Particle, Time step, r, theta\n")
+        buffer = []
         while sim.t < total_time:
             sim.integrate(sim.t + sim.dt)  # Integrate simulation
             for i in range(1, sim.N):
-                 f.write(f"{i}, {sim.t:.6f}, {sim.particles[i].x:.6f}, {sim.particles[i].y:.6f}, {sim.particles[i].z:.6f}\n")
+                buffer.append(f"{i}, {sim.t:.6f}, {sim.particles[i].x:.6f}, {sim.particles[i].y:.6f}, {sim.particles[i].z:.6f}\n")
+            if len(buffer) >= 1000:  # Write in chunks
+                f.writelines(buffer)
+                buffer = []
+        if buffer:  # Write remaining data
+            f.writelines(buffer)
 
 
 # Start the timer
