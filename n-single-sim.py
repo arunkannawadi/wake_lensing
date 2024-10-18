@@ -3,9 +3,6 @@ import numpy as np
 import os
 import time  # Import the time module
 
-from mass_profiles import UniformDensityMassProfile
-from radial_forces import RadialForce  # Import the RadialForce class from the radial_forces module
-
 # Parameters
 theta = 30 * np.pi / 180  # Half of the total opening angle (in radians)
 velocity = 1.0  # Unit velocity
@@ -51,13 +48,14 @@ def run_simulation_with_particles(n_particles):
         y = initial_distance * np.sin(phi) * np.sin(theta)
         z = initial_distance * np.cos(phi)
 
+
         velocity_angle_theta = np.random.uniform(0, 2 * np.pi)  # Random velocity direction
         velocity_angle_phi = np.random.uniform(0, np.pi)
         vx = velocity * np.sin(velocity_angle_phi) * np.cos(velocity_angle_theta)
         vy = velocity * np.sin(velocity_angle_phi) * np.sin(velocity_angle_theta)
         vz = velocity * np.cos(velocity_angle_phi)
 
-
+        
         sim.add(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz)  # Mass is 0 by default for test particles
 
         # Calculate the orbital period for this particle
@@ -68,9 +66,7 @@ def run_simulation_with_particles(n_particles):
     sim.N_active = 1  # Only the central mass is active
 
     # Add the additional force to the simulation
-    radial_force = RadialForce(M=M)
-    radial_force.mass_profile = UniformDensityMassProfile(r_s=100000.)
-    sim.additional_forces = radial_force
+    sim.additional_forces = constant_force
 
     # Define the total simulation time based on the longest orbital period
     total_time = n_periods * max(orbital_periods)  # Total time to simulate
@@ -90,6 +86,7 @@ def run_simulation_with_particles(n_particles):
                 buffer = []
         if buffer:  # Write remaining data
             f.writelines(buffer)
+
 
 # Start the timer
 start_time = time.time()
