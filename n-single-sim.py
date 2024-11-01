@@ -3,7 +3,7 @@ import numpy as np
 import os
 import time  # Import the time module
 
-from mass_profiles import PointMassProfile
+from mass_profiles import *
 from radial_forces import RadialForce  # Import the RadialForce class from the radial_forces module
 
 # Parameters
@@ -70,7 +70,7 @@ def run_simulation_with_particles(n_particles):
 
     # Add the additional force to the simulation
     radial_force = RadialForce(M=M)
-    radial_force.mass_profile = PointMassProfile(r_s=100000.)
+    radial_force.mass_profile = EinastoProfile(r_s=100000., n=5)
     sim.additional_forces = radial_force
 
     # Define the total simulation time based on the longest orbital period
@@ -99,7 +99,7 @@ def run_simulation_with_particles(n_particles):
 start_time = time.time()
 
 # Running the simulation with 100 particles
-n_particles = 100
+n_particles = 1000
 run_simulation_with_particles(n_particles)
 
 # End the timer
