@@ -2,21 +2,13 @@ import numpy as np
 import os
 
 # Parameters
-theta = 30 * np.pi / 180  # Azimuthal angle (opening angle)
-phi = 30 * np.pi / 180    # Polar angle (opening angle)
+cone_angle_half = 30 * np.pi / 180  # Half of the opening angle in radians
 output_folder = "simd"
 
 # Precompute the cone direction and cosine of the cone angle
-cone_direction_left = np.array([
-    np.sin(phi) * np.cos(theta),
-    np.sin(phi) * np.sin(theta),
-    np.cos(phi)
-])
-cone_direction_left /= np.linalg.norm(cone_direction_left)
-cos_cone_angle = np.cos(theta)  # Assuming symmetric cones
-
-# Right cone is in the opposite direction
-cone_direction_right = -cone_direction_left
+cone_direction_left = np.array([1, 0, 0])  # Along positive x-axis
+cone_direction_right = -cone_direction_left  # Along negative x-axis
+cos_cone_angle = np.cos(cone_angle_half)  # Cosine of the cone half-angle
 
 # Function to check if points are inside a cone using dot products
 def in_cone(positions, cone_direction):
@@ -29,8 +21,12 @@ def in_cone(positions, cone_direction):
 
 # Function to calculate cone probabilities from the simulation data
 def calculate_cone_probabilities(file_path):
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} not found.")
+        return None, None, None
+
     data = np.loadtxt(file_path, delimiter=',', skiprows=1)
-    
+
     particle_ids = data[:, 0].astype(int)
     unique_particles = np.unique(particle_ids)
     total_timesteps = len(np.unique(data[:, 1]))  # Number of timesteps
