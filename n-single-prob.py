@@ -85,30 +85,29 @@ cone_base_right = np.array([1, 0, 0])  # 1 unit along the x-axis for the base ce
 output_file = os.path.join(output_folder, "combined_simulation.txt")
 left_probs, right_probs, all_positions = calculate_cone_probabilities(output_file, half_ap_cos, cone_apex_left, cone_base_left, cone_apex_right, cone_base_right)
 
-if left_probs is not None and right_probs is not None:
-    # Calculate average probabilities
-    average_left_prob = np.mean(left_probs)
-    average_right_prob = np.mean(right_probs)
+# Calculate average probabilities
+average_left_prob = np.mean(left_probs)
+average_right_prob = np.mean(right_probs)
 
-    # Output probability results
-    print(f"Average probability of particles in left cone: {average_left_prob:.3f}")
-    print(f"Average probability of particles in right cone: {average_right_prob:.3f}")
+# Output probability results
+print(f"Average probability of particles in left cone: {average_left_prob:.3f}")
+print(f"Average probability of particles in right cone: {average_right_prob:.3f}")
 
-    # Calculate and output 3D moments
-    mean_position = calculate_means(all_positions)
-    covariance_matrix = calculate_covariance_matrix(all_positions)
+# Calculate and output 3D moments
+mean_position = calculate_means(all_positions)
+covariance_matrix = calculate_covariance_matrix(all_positions)
 
-    print("\n3D Distribution Analysis:")
-    print(f"Mean position (centroid): {mean_position}")
-    print("Covariance matrix:")
-    print(covariance_matrix)
+print("\n3D Distribution Analysis:")
+print(f"Mean position (centroid): {mean_position}")
+print("Covariance matrix:")
+print(covariance_matrix)
 
-    # Check for deviations from spherical symmetry
-    variances = np.diag(covariance_matrix)
-    print("\nVariances along x, y, z axes:", variances)
-    spherical_symmetry = np.allclose(variances, variances[0], rtol=0.1)
+# Check for deviations from spherical symmetry
+variances = np.diag(covariance_matrix)
+print("\nVariances along x, y, z axes:", variances)
+spherical_symmetry = np.allclose(variances, variances[0], rtol=0.1)
 
-    if spherical_symmetry:
-        print("The distribution is approximately spherically symmetric.")
-    else:
-        print("The distribution deviates from spherical symmetry.")
+if spherical_symmetry:
+    print("The distribution is approximately spherically symmetric.")
+else:
+    print("The distribution deviates from spherical symmetry.")
