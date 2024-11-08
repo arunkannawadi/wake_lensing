@@ -99,7 +99,7 @@ def run_simulation_with_particles(n_particles):
 start_time = time.time()
 
 # Running the simulation with 100 particles
-n_particles = 1000
+n_particles = 10
 run_simulation_with_particles(n_particles)
 
 # End the timer

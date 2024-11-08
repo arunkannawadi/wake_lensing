@@ -10,7 +10,7 @@ theta = 30 * np.pi / 180  # Half of the total opening angle (in radians)
 velocity = 1.0  # Unit velocity
 n_periods = 2  # Number of periods to simulate
 unit_length = 1.0  # Define the region of observation as unit length
-output_folder = "simulation_data_combined"  # Folder to store the output files
+output_folder = "simd"  # Folder to store the output files
 
 # Create the output folder if it doesn't exist
 os.makedirs(output_folder, exist_ok=True)
