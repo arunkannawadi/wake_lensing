@@ -39,7 +39,7 @@ def run_simulation(simulation_number):
 
     # Add the small particle with random initial conditions
     initial_distance = np.random.uniform(0.0, unit_length)
-    theta = np.random.uniform(0, 2 * np.pi)  # Polar angle
+    theta = np.arccos(np.random.uniform(-1, 1))  # Polar angle
     phi = np.random.uniform(0, np.pi)  # Azimuthal angle
     x = initial_distance * np.sin(phi) * np.cos(theta)
     y = initial_distance * np.sin(phi) * np.sin(theta)
