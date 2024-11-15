@@ -33,13 +33,26 @@ def constant_force(reb_sim):
         ps[i].ax += 0  # Apply constant force in the x direction for each test particle
 
 # Function to run a simulation with multiple test particles
-def run_simulation_with_particles(n_particles):
+def run_simulation_with_particles(n_particles, black_hole_distance=None, black_hole_approaching=False):
     sim = rebound.Simulation()
-    sim.integrator = "ias15"  # Fast integrator for test particles
-    sim.dt = 0.01  # Small timestep
+    sim.integrator = "whfast"  # Fast integrator for test particles
+    sim.dt = 0.1  # Small timestep
 
     # Add the massive stationary particle at the center
     sim.add(m=M)  # Central mass
+
+    # Initialize the black hole's position and behavior
+    if black_hole_distance is not None:
+        # Place the black hole at a specified distance along the x-axis with zero initial velocity
+        x_bh = black_hole_distance = np.random.uniform(0.0, unit_length)
+        y_bh = 0.0
+        z_bh = 0.0
+        vx_bh = 0.0
+        vy_bh = 0.0
+        vz_bh = 0.0
+
+        # Add the black hole to the simulation with zero initial velocity
+        sim.add(x=x_bh, y=y_bh, z=z_bh, vx=vx_bh, vy=vy_bh, vz=vz_bh, m=10.0)  # Set black hole's mass
 
     # Add multiple small particles with random initial conditions
     orbital_periods = []
@@ -64,8 +77,8 @@ def run_simulation_with_particles(n_particles):
         orbital_period = calculate_orbital_period(initial_distance, M)
         orbital_periods.append(orbital_period)
 
-    # Set N_active to ensure only the central mass influences the test particles
-    sim.N_active = 1  # Only the central mass is active
+    # Set N_active to ensure only the central mass and black hole (if added) influence the test particles
+    sim.N_active = 2 if black_hole_distance is not None else 1
 
     # Add the additional force to the simulation
     radial_force = RadialForce(M=M)
@@ -87,7 +100,7 @@ def run_simulation_with_particles(n_particles):
     output_data = np.array(output_data)
 
     # Define the output file for this simulation
-    output_file = os.path.join(output_folder, f"combined_simulation.txt")
+    output_file = os.path.join(output_folder, f"combined_simulation_with_black_hole.txt")
 
     # Use numpy.savetxt to write all data at once
     header = "Particle, Time step, x, y, z"
@@ -96,10 +109,13 @@ def run_simulation_with_particles(n_particles):
 # Start the timer
 start_time = time.time()
 
-# Running the simulation with 100 particles
-n_particles = 10
-run_simulation_with_particles(n_particles)
+# Black hole infinitely far (or effectively inactive)
 
+run_simulation_with_particles(n_particles=10, black_hole_distance=None)
+print("Running simulation with black hole infinitely far")
+
+# Running the simulation with 100 particles
+n_particles = 100
 # End the timer
 end_time = time.time()
 

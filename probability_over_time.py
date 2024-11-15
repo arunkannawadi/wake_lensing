@@ -52,7 +52,6 @@ for t in time_steps:
     # Check membership in left and right cones
     left_count = sum(left_cone.is_in_shape(pos) for pos in positions)
     right_count = sum(right_cone.is_in_shape(pos) for pos in positions)
-
     left_counts.append(left_count)
     right_counts.append(right_count)
 
@@ -64,3 +63,51 @@ plt.ylabel("Number of Particles in Cone")
 plt.title("Number of Particles in Left and Right Cones Over Time")
 plt.legend()
 plt.show()
+
+"""
+time_steps = np.unique(data[:, 1])  # Unique time steps
+xx_moments = []
+xy_moments = []
+
+# Loop through each time step and calculate moments
+for t in time_steps:
+    # Select particles at this time step
+    time_data = data[data[:, 1] == t]
+    if time_data.size == 0:
+        xx_moments.append(0)
+        xy_moments.append(0)
+        continue
+
+    # Extract x and y positions
+    x_positions = time_data[:, 2]
+    y_positions = time_data[:, 3]
+
+    # Calculate moments
+    xx_moment = np.sum(x_positions**2)
+    xy_moment = np.sum(x_positions * y_positions)
+
+    xx_moments.append(xx_moment)
+    xy_moments.append(xy_moment)
+
+# Plot xx and xy moments over time
+plt.figure(figsize=(10, 5))
+
+# Plot xx moment
+plt.subplot(1, 2, 1)
+plt.plot(time_steps, xx_moments, label="XX Moment")
+plt.xlabel("Time Step")
+plt.ylabel("XX Moment")
+plt.title("XX Moment Over Time")
+plt.legend()
+
+# Plot xy moment
+plt.subplot(1, 2, 2)
+plt.plot(time_steps, xy_moments, label="XY Moment")
+plt.xlabel("Time Step")
+plt.ylabel("XY Moment")
+plt.title("XY Moment Over Time")
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+"""
