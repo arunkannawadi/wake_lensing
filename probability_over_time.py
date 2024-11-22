@@ -38,13 +38,23 @@ time_steps = np.unique(data[:, 1])  # Unique time steps
 left_counts = []
 right_counts = []
 
-# Loop through each time step and count particles in each cone
+# Initialize lists for moments
+moment_xy = []
+moment_x2 = []
+moment_y2 = []
+anisotropy = []
+
+# Loop through each time step
 for t in time_steps:
     # Select particles at this time step
     time_data = data[data[:, 1] == t]
     if time_data.size == 0:
         left_counts.append(0)
         right_counts.append(0)
+        moment_xy.append(0)
+        moment_x2.append(0)
+        moment_y2.append(0)
+        anisotropy.append(0)
         continue
 
     positions = time_data[:, 2:5]  # x, y, z columns
@@ -55,59 +65,42 @@ for t in time_steps:
     left_counts.append(left_count)
     right_counts.append(right_count)
 
+    # Extract x and y components for moment calculations
+    x = time_data[:, 2]
+    y = time_data[:, 3]
+
+    # Calculate moments
+    mean_xy = np.mean(x * y)
+    mean_x2 = np.mean(x**2)
+    mean_y2 = np.mean(y**2)
+    anisotropy_value = mean_x2 - mean_y2
+
+    # Store moments
+    moment_xy.append(mean_xy)
+    moment_x2.append(mean_x2)
+    moment_y2.append(mean_y2)
+    anisotropy.append(anisotropy_value)
+
 # Plot the number of particles in each cone over time
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
 plt.plot(time_steps, left_counts, label="Left Cone")
 plt.plot(time_steps, right_counts, label="Right Cone")
 plt.xlabel("Time Step")
 plt.ylabel("Number of Particles in Cone")
 plt.title("Number of Particles in Left and Right Cones Over Time")
 plt.legend()
-plt.show()
 
-"""
-time_steps = np.unique(data[:, 1])  # Unique time steps
-xx_moments = []
-xy_moments = []
-
-# Loop through each time step and calculate moments
-for t in time_steps:
-    # Select particles at this time step
-    time_data = data[data[:, 1] == t]
-    if time_data.size == 0:
-        xx_moments.append(0)
-        xy_moments.append(0)
-        continue
-
-    # Extract x and y positions
-    x_positions = time_data[:, 2]
-    y_positions = time_data[:, 3]
-
-    # Calculate moments
-    xx_moment = np.sum(x_positions**2)
-    xy_moment = np.sum(x_positions * y_positions)
-
-    xx_moments.append(xx_moment)
-    xy_moments.append(xy_moment)
-
-# Plot xx and xy moments over time
-plt.figure(figsize=(10, 5))
-
-# Plot xx moment
-plt.subplot(1, 2, 1)
-plt.plot(time_steps, xx_moments, label="XX Moment")
-plt.xlabel("Time Step")
-plt.ylabel("XX Moment")
-plt.title("XX Moment Over Time")
-plt.legend()
-
-# Plot xy moment
+# Plot moments over time
 plt.subplot(1, 2, 2)
-plt.plot(time_steps, xy_moments, label="XY Moment")
+plt.plot(time_steps, moment_xy, label="⟨xy⟩")
+plt.plot(time_steps, moment_x2, label="⟨x²⟩")
+plt.plot(time_steps, moment_y2, label="⟨y²⟩")
+plt.plot(time_steps, anisotropy, label="Anisotropy (⟨x²⟩ - ⟨y²⟩)")
 plt.xlabel("Time Step")
-plt.ylabel("XY Moment")
-plt.title("XY Moment Over Time")
+plt.ylabel("Moment Value")
+plt.title("Moments of the Particle System Over Time")
 plt.legend()
 
 plt.tight_layout()
 plt.show()
-"""

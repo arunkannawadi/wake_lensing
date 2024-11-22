@@ -20,38 +20,10 @@ left_cone = Cone(apex=cone_apex_left, base=cone_base_left, aperture_angle=apertu
 right_cone = Cone(apex=cone_apex_right, base=cone_base_right, aperture_angle=aperture_angle)
 
 # File path for simulation data
-output_file = os.path.join(output_folder, "combined_simulation.txt")
+output_file = os.path.join(output_folder, "combined_simulation_with_black_hole.txt")
 
 # Calculate probabilities and 3D moments from the output file
 left_probs, right_probs, all_positions = ProbabilityCalculator.calculate(output_file, left_cone, right_cone)
-
-# New list to store probabilities over time
-left_probs_over_time = []
-right_probs_over_time = []
-
-for timestep_data in output_file:  # Use output_data from your simulation loop
-    positions = timestep_data[:, 2:5]  # Extract x, y, z positions for each particle
-    left_prob, right_prob = ProbabilityCalculator.calculate_probabilities(positions, left_cone, right_cone)
-    left_probs_over_time.append(left_prob)
-    right_probs_over_time.append(right_prob)
-
-import matplotlib.pyplot as plt
-
-# Convert lists to numpy arrays for easy indexing
-left_probs_over_time = np.array(left_probs_over_time)
-right_probs_over_time = np.array(right_probs_over_time)
-time_steps = np.arange(len(left_probs_over_time)) * sim.dt  # Adjust for time based on timestep size
-
-# Plot probabilities over time
-plt.figure()
-plt.plot(time_steps, left_probs_over_time, label='Left Cone Probability')
-plt.plot(time_steps, right_probs_over_time, label='Right Cone Probability')
-plt.xlabel('Time')
-plt.ylabel('Probability')
-plt.title('Probability Over Time in Left and Right Cones')
-plt.legend()
-plt.show()
-
 
 # Calculate average probabilities
 average_left_prob = np.mean(left_probs)
@@ -71,7 +43,7 @@ def calculate_covariance_matrix(positions):
     centered_positions = positions - mean_position
     covariance_matrix = np.cov(centered_positions, rowvar=False)
     return covariance_matrix
-
+"""
 # Calculate and output 3D moments
 mean_position = calculate_means(all_positions)
 covariance_matrix = calculate_covariance_matrix(all_positions)
@@ -90,4 +62,73 @@ if spherical_symmetry:
     print("The distribution is approximately spherically symmetric.")
 else:
     print("The distribution deviates from spherical symmetry.")
+"""
+import pandas as pd
+import matplotlib.pyplot as plt
 
+# Step 1: Load the data
+file_path = output_file  # Replace with your file path
+data = pd.read_csv(file_path, sep="\t", names=["Particle", "Time step", "x", "y", "z"])
+data = data.dropna(subset=["x", "y", "z"])
+
+# Step 2: Group by time step
+grouped = data.groupby("Time step")
+
+# Initialize lists to store results
+time_steps = []
+moment_xy = []
+moment_x2 = []
+moment_y2 = []
+anisotropy = []
+
+# Step 3: Calculate moments for each time step
+for time_step, group in grouped:
+    x = group["x"].values
+    y = group["y"].values
+    
+    # Compute mean and standard deviation
+    mean_x = np.mean(x)
+    mean_y = np.mean(y)
+    std_x = np.std(x)
+    std_y = np.std(y)
+    
+    # Standardize the coordinates
+    x_std = (x - mean_x) / std_x
+    y_std = (y - mean_y) / std_y
+    
+    # Compute second moments using standardized coordinates
+    x2 = np.mean(x_std**2)
+    y2 = np.mean(y_std**2)
+    xy = np.mean(x_std * y_std)
+    
+    # Anisotropy
+    anisotropy_value = x2 - y2
+    
+    # Store results
+    time_steps.append(time_step)
+    moment_xy.append(xy)
+    moment_x2.append(x2)
+    moment_y2.append(y2)
+    anisotropy.append(anisotropy_value)
+
+# Step 4: Plot results
+plt.figure(figsize=(12, 6))
+
+# Plot xy moment
+plt.subplot(1, 2, 1)
+plt.plot(time_steps, moment_xy, label="⟨xy⟩")
+plt.xlabel("Time step")
+plt.ylabel("⟨xy⟩")
+plt.title("Cross-Term Moment (⟨xy⟩)")
+plt.legend()
+
+# Plot anisotropy
+plt.subplot(1, 2, 2)
+plt.plot(time_steps, anisotropy, label="Anisotropy (xx-yy)")
+plt.xlabel("Time step")
+plt.ylabel("Anisotropy (⟨x²⟩ - ⟨y²⟩)")
+plt.title("Anisotropy Over Time")
+plt.legend()
+
+plt.tight_layout()
+plt.show()

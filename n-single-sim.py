@@ -26,17 +26,11 @@ os.makedirs(output_folder, exist_ok=True)
 def calculate_orbital_period(distance, M):
     return 2 * np.pi * np.sqrt(distance**3 / (G * M))
 
-# Define the constant force (Stark force)
-def constant_force(reb_sim):
-    ps = reb_sim.contents.particles  # Access particles via reb_sim.contents
-    for i in range(1, reb_sim.contents.N):
-        ps[i].ax += 0  # Apply constant force in the x direction for each test particle
-
 # Function to run a simulation with multiple test particles
 def run_simulation_with_particles(n_particles, black_hole_distance=None, black_hole_approaching=False):
     sim = rebound.Simulation()
-    sim.integrator = "whfast"  # Fast integrator for test particles
-    sim.dt = 0.1  # Small timestep
+    sim.integrator = "ias15"
+    sim.dt = 0.01  # Small timestep
 
     # Add the massive stationary particle at the center
     sim.add(m=M)  # Central mass
@@ -52,7 +46,7 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
         vz_bh = 0.0
 
         # Add the black hole to the simulation with zero initial velocity
-        sim.add(x=x_bh, y=y_bh, z=z_bh, vx=vx_bh, vy=vy_bh, vz=vz_bh, m=10.0)  # Set black hole's mass
+        sim.add(x=x_bh, y=y_bh, z=z_bh, vx=vx_bh, vy=vy_bh, vz=vz_bh, m=M)  # Set black hole's mass
 
     # Add multiple small particles with random initial conditions
     orbital_periods = []
@@ -63,14 +57,9 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
         x = initial_distance * np.sin(phi) * np.cos(theta)
         y = initial_distance * np.sin(phi) * np.sin(theta)
         z = initial_distance * np.cos(phi)
-
-
-        velocity_angle_theta = np.random.uniform(0, 2 * np.pi)  # Random velocity direction
-        velocity_angle_phi = np.random.uniform(0, np.pi)
-        vx = velocity * np.sin(velocity_angle_phi) * np.cos(velocity_angle_theta)
-        vy = velocity * np.sin(velocity_angle_phi) * np.sin(velocity_angle_theta)
-        vz = velocity * np.cos(velocity_angle_phi)
-
+        vx = 0.0
+        vy = 0.0
+        vz = 0.0
 
         sim.add(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz)  # Mass is 0 by default for test particles
 
@@ -79,11 +68,11 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
         orbital_periods.append(orbital_period)
 
     # Set N_active to ensure only the central mass and black hole (if added) influence the test particles
-    sim.N_active = 2 if black_hole_distance is not None else 1
+    #sim.N_active = sim.N
 
     # Add the additional force to the simulation
     radial_force = RadialForce(M=M)
-    radial_force.mass_profile = EinastoProfile(r_s=100000., n=5)
+    radial_force.mass_profile = UniformDensityMassProfile(r_s=100000.0)
     sim.additional_forces = radial_force
 
     # Define the total simulation time based on the longest orbital period
@@ -101,7 +90,7 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
     output_data = np.array(output_data)
 
     # Define the output file for this simulation
-    output_file = os.path.join(output_folder, f"combined_simulation_with_black_hole.txt")
+    output_file = os.path.join(output_folder, f"cs1.txt")
 
     # Use numpy.savetxt to write all data at once
     header = "Particle, Time step, x, y, z"
@@ -111,13 +100,12 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
 # Start the timer
 start_time = time.time()
 
-# Black hole infinitely far (or effectively inactive)
+# Running the simulation with 100 particles
+n_particles = 10
 
-run_simulation_with_particles(n_particles=10, black_hole_distance=None)
+run_simulation_with_particles(n_particles, black_hole_distance=None)
 print("Running simulation with black hole infinitely far")
 
-# Running the simulation with 100 particles
-n_particles = 100
 # End the timer
 end_time = time.time()
 
