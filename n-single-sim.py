@@ -9,7 +9,7 @@ from radial_forces import RadialForce  # Import the RadialForce class from the r
 # Parameters
 theta = 30 * np.pi / 180  # Half of the total opening angle (in radians)
 velocity = 1.0  # Unit velocity
-n_periods = 2  # Number of periods to simulate
+n_periods = 3  # Number of periods to simulate
 unit_length = 1.0  # Define the region of observation as unit length
 output_folder = "simd"  # Folder to store the output files
 np.random.seed(42)
@@ -68,11 +68,11 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
         orbital_periods.append(orbital_period)
 
     # Set N_active to ensure only the central mass and black hole (if added) influence the test particles
-    #sim.N_active = sim.N
+    sim.N_active = sim.N
 
     # Add the additional force to the simulation
     radial_force = RadialForce(M=M)
-    radial_force.mass_profile = UniformDensityMassProfile(r_s=100000.0)
+    radial_force.mass_profile = UniformDensityMassProfile(r_s=10.0)
     sim.additional_forces = radial_force
 
     # Define the total simulation time based on the longest orbital period
@@ -101,7 +101,7 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
 start_time = time.time()
 
 # Running the simulation with 100 particles
-n_particles = 10
+n_particles = 5
 
 run_simulation_with_particles(n_particles, black_hole_distance=None)
 print("Running simulation with black hole infinitely far")
