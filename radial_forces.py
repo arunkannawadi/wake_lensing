@@ -44,6 +44,7 @@ class RadialForce:
             particle.ax = a_r * particle.x
             particle.ay = a_r * particle.y
             particle.az = a_r * particle.z
+            
 
 
 
