@@ -31,6 +31,7 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
     sim = rebound.Simulation()
     sim.integrator = "ias15"
     sim.dt = 0.01  # Small timestep
+    sim.ri_ias15.min_dt = 1e-6  # Minimum timestep
 
     # Add the massive stationary particle at the center
     sim.add(m=M)  # Central mass
