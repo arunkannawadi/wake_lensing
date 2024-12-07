@@ -6,7 +6,7 @@ import os
 # Parameters
 theta = 30 * np.pi / 180  # 30 degrees in radians
 unit_length = 1.0
-output_folder = "simulation_data_combined"  # Updated output folder
+output_folder = "simd"  # Updated output folder
 
 # Load the simulation data from a specific file
 def load_simulation_data(file_path):
@@ -54,13 +54,13 @@ def update(frame):
 
 # Collect data from the simulation file
 all_positions = []
-simulation_file = os.path.join(output_folder, "combined_simulation.txt")  # Single combined file
+simulation_file = "simd/cs1.txt"
 
 # Load data for all particles from the file
 particle_ids, time_steps, x_positions, y_positions = load_simulation_data(simulation_file)
 
 # Create a line object for each unique particle
-unique_particle_ids = np.unique(particle_ids)
+unique_particle_ids = np.unique(particle_ids)[:50]
 for particle_id in unique_particle_ids:
     particle_mask = (particle_ids == particle_id)
     x_pos = x_positions[particle_mask]
