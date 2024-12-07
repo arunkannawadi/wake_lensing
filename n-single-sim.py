@@ -2,6 +2,10 @@ import rebound
 import numpy as np
 import os
 import time  # Import the time module
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 from mass_profiles import *
 from radial_forces import RadialForce  # Import the RadialForce class from the radial_forces module
@@ -69,6 +73,8 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
         orbital_period = calculate_orbital_period(initial_distance, M)
         orbital_periods.append(orbital_period)
 
+        logger.debug(f"Particle {i}: x={x}, y={y}, z={z}, vx={vx}, vy={vy}, vz={vz}")
+
     # Set N_active to ensure only the central mass and black hole (if added) influence the test particles
     sim.N_active = sim.N
 
@@ -79,6 +85,7 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
 
     # Define the total simulation time based on the longest orbital period
     total_time = n_periods * max(orbital_periods)  # Total time to simulate
+    logger.info("Total simulation time: %f", total_time)
 
     # Store the data for all particles and timesteps
     output_data = []
