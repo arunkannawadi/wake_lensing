@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 from mass_profiles import *
 from radial_forces import RadialForce  # Import the RadialForce class from the radial_forces module
 
+from mass_profiles import UniformDensityMassProfile
+from radial_forces import RadialForce  # Import the RadialForce class from the radial_forces module
+
 # Parameters
 theta = 30 * np.pi / 180  # Half of the total opening angle (in radians)
 velocity = 1.0  # Unit velocity
@@ -104,7 +107,6 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
     # Use numpy.savetxt to write all data at once
     header = "Particle, Time step, x, y, z"
     np.savetxt(output_file, output_data, fmt="%.6f", delimiter=",", header=header)
-
 
 # Start the timer
 start_time = time.time()
