@@ -33,8 +33,9 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
     sim.dt = 0.01  # Small timestep
     sim.ri_ias15.min_dt = 1e-6  # Minimum timestep
 
+    sim.add()  # A test particle at the center to act as the frame of reference.
     # Add the massive stationary particle at the center
-    sim.add(m=M)  # Central mass
+    # sim.add(m=M)  # Central mass
 
     # Initialize the black hole's position and behavior
     if black_hole_distance is not None:
