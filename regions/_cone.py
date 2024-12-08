@@ -1,14 +1,20 @@
-# shape_profiles/cone.py
 import numpy as np
-from ._base_shape import ShapeProfile
+from ._base_shape import Region
 
-class Cone(ShapeProfile):
+__all__ = ("Cone",)
+
+
+class Cone(Region):
     """Class representing a cone shape."""
 
-    def __init__(self, apex: np.ndarray, base: np.ndarray, aperture_angle: float):
-        self.apex = apex
+    def __init__(self, base: np.ndarray, aperture_angle: float, **kwargs):
+        super().__init__(**kwargs)
         self.base = base
         self.aperture_cos = np.cos(aperture_angle / 2)
+
+    @property
+    def apex(self):
+        return self.center
 
     def is_in_shape(self, point: np.ndarray) -> bool:
         # Vector from apex to point
