@@ -43,7 +43,7 @@ def calculate_covariance_matrix(positions):
     centered_positions = positions - mean_position
     covariance_matrix = np.cov(centered_positions, rowvar=False)
     return covariance_matrix
-"""
+
 # Calculate and output 3D moments
 mean_position = calculate_means(all_positions)
 covariance_matrix = calculate_covariance_matrix(all_positions)
@@ -62,73 +62,3 @@ if spherical_symmetry:
     print("The distribution is approximately spherically symmetric.")
 else:
     print("The distribution deviates from spherical symmetry.")
-"""
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Step 1: Load the data
-file_path = output_file  # Replace with your file path
-data = pd.read_csv(file_path, sep="\t", names=["Particle", "Time step", "x", "y", "z"])
-data = data.dropna(subset=["x", "y", "z"])
-
-# Step 2: Group by time step
-grouped = data.groupby("Time step")
-
-# Initialize lists to store results
-time_steps = []
-moment_xy = []
-moment_x2 = []
-moment_y2 = []
-anisotropy = []
-
-# Step 3: Calculate moments for each time step
-for time_step, group in grouped:
-    x = group["x"].values
-    y = group["y"].values
-    
-    # Compute mean and standard deviation
-    mean_x = np.mean(x)
-    mean_y = np.mean(y)
-    std_x = np.std(x)
-    std_y = np.std(y)
-    
-    # Standardize the coordinates
-    x_std = (x - mean_x) / std_x
-    y_std = (y - mean_y) / std_y
-    
-    # Compute second moments using standardized coordinates
-    x2 = np.mean(x_std**2)
-    y2 = np.mean(y_std**2)
-    xy = np.mean(x_std * y_std)
-    
-    # Anisotropy
-    anisotropy_value = x2 - y2
-    
-    # Store results
-    time_steps.append(time_step)
-    moment_xy.append(xy)
-    moment_x2.append(x2)
-    moment_y2.append(y2)
-    anisotropy.append(anisotropy_value)
-
-# Step 4: Plot results
-plt.figure(figsize=(12, 6))
-
-# Plot xy moment
-plt.subplot(1, 2, 1)
-plt.plot(time_steps, moment_xy, label="⟨xy⟩")
-plt.xlabel("Time step")
-plt.ylabel("⟨xy⟩")
-plt.title("Cross-Term Moment (⟨xy⟩)")
-plt.legend()
-
-# Plot anisotropy
-plt.subplot(1, 2, 2)
-plt.plot(time_steps, anisotropy, label="Anisotropy (xx-yy)")
-plt.xlabel("Time step")
-plt.ylabel("Anisotropy (⟨x²⟩ - ⟨y²⟩)")
-plt.title("Anisotropy Over Time")
-plt.legend()
-
-plt.tight_layout()
-plt.show()
