@@ -1,14 +1,18 @@
-import rebound
-import numpy as np
+import logging
 import os
 import time  # Import the time module
-import logging
+
+import numpy as np
+import rebound
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from mass_profiles import *
-from radial_forces import RadialForce  # Import the RadialForce class from the radial_forces module
+from mass_profiles import UniformDensityMassProfile
+from radial_forces import (
+    RadialForce,
+)  # Import the RadialForce class from the radial_forces module
 
 # Parameters
 theta = 30 * np.pi / 180  # Half of the total opening angle (in radians)
@@ -26,13 +30,18 @@ c = 0.01  # Constant force magnitude
 # Create the output folder if it doesn't exist
 os.makedirs(output_folder, exist_ok=True)
 
+
 # Function to calculate orbital period based on initial distance
 def calculate_orbital_period(distance, M):
     return 2 * np.pi * np.sqrt(distance**3 / (G * M))
 
+
 # Function to run a simulation with multiple test particles
-def run_simulation_with_particles(n_particles, black_hole_distance=None, black_hole_approaching=False):
+def run_simulation_with_particles(
+    n_particles, black_hole_distance=None, black_hole_approaching=False
+):
     sim = rebound.Simulation()
+    sim.start_server(port=1234)
     sim.integrator = "ias15"
     sim.dt = 0.01  # Small timestep
     sim.ri_ias15.min_dt = 1e-6  # Minimum timestep
@@ -52,7 +61,9 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
         vz_bh = 0.0
 
         # Add the black hole to the simulation with zero initial velocity
-        sim.add(x=x_bh, y=y_bh, z=z_bh, vx=vx_bh, vy=vy_bh, vz=vz_bh, m=M)  # Set black hole's mass
+        sim.add(
+            x=x_bh, y=y_bh, z=z_bh, vx=vx_bh, vy=vy_bh, vz=vz_bh, m=M
+        )  # Set black hole's mass
 
     # Add multiple small particles with random initial conditions
     orbital_periods = []
@@ -67,7 +78,9 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
         vy = 0.0
         vz = 0.0
 
-        sim.add(x=x, y=y, z=z, vx=vx, vy=vy, vz=vz)  # Mass is 0 by default for test particles
+        sim.add(
+            x=x, y=y, z=z, vx=vx, vy=vy, vz=vz
+        )  # Mass is 0 by default for test particles
 
         # Calculate the orbital period for this particle
         orbital_period = calculate_orbital_period(initial_distance, M)
@@ -93,7 +106,9 @@ def run_simulation_with_particles(n_particles, black_hole_distance=None, black_h
     while sim.t < total_time:
         sim.integrate(sim.t + sim.dt)  # Integrate simulation
         for i in range(1, sim.N):
-            output_data.append([i, sim.t, sim.particles[i].x, sim.particles[i].y, sim.particles[i].z])
+            output_data.append(
+                [i, sim.t, sim.particles[i].x, sim.particles[i].y, sim.particles[i].z]
+            )
 
     # Convert output_data to a NumPy array
     output_data = np.array(output_data)

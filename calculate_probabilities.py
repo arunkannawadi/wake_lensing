@@ -1,13 +1,13 @@
 import os
-import numpy as np
 from typing import TYPE_CHECKING
+
+import numpy as np
 
 if TYPE_CHECKING:
     from .probability_profiles import ShapeProfile
 
-__all__ = (
-    "ProbabilityCalculator",
-)
+__all__ = ("ProbabilityCalculator",)
+
 
 class ProbabilityCalculator:
     @staticmethod
@@ -16,7 +16,7 @@ class ProbabilityCalculator:
             print(f"Error: File {file_path} not found.")
             return None, None, None
 
-        data = np.loadtxt(file_path, delimiter=',', skiprows=1)
+        data = np.loadtxt(file_path, delimiter=",", skiprows=1)
 
         particle_ids = data[:, 0].astype(int)
         unique_particles = np.unique(particle_ids)
@@ -36,7 +36,9 @@ class ProbabilityCalculator:
             left_time_counts.append(np.sum(left_in_shape))
 
             # Check if positions are inside the right shape
-            right_in_shape = np.array([shape_right.is_in_shape(pos) for pos in positions])
+            right_in_shape = np.array(
+                [shape_right.is_in_shape(pos) for pos in positions]
+            )
             right_time_counts.append(np.sum(right_in_shape))
 
         left_probabilities = np.array(left_time_counts) / total_timesteps
@@ -44,5 +46,6 @@ class ProbabilityCalculator:
         all_positions = np.vstack(all_positions)
 
         return left_probabilities, right_probabilities, all_positions
+
 
 __all__ = ["ProbabilityCalculator"]
