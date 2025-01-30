@@ -2,8 +2,10 @@ import numpy as np
 
 from ._base_shape import Region
 
-
-__all__ = ("Shell", "Sphere",)
+__all__ = (
+    "Shell",
+    "Sphere",
+)
 
 
 class Shell(Region):
@@ -30,16 +32,16 @@ class Sphere(Shell):
     def r_inner(self):
         return 0.0
 
-    @r_inner.setter
-    def r_inner(self, value:None=None):
-        if value is not None:
-            raise ValueError("Cannot set r_inner on a Sphere instance.")
-
     @property
     def r_outer(self):
         return self.radius
 
+    @r_inner.setter
+    def r_inner(self, value: None = None):
+        if value is not None:
+            raise ValueError("Cannot set r_inner on a Sphere instance.")
+
     @r_outer.setter
-    def r_outer(self, value:None=None):
+    def r_outer(self, value: None = None):
         if value is not None:
             raise ValueError("Cannot set r_outer on a Sphere instance.")

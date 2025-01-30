@@ -1,8 +1,6 @@
 from . import MassProfile
 
-__all__ = (
-    "UniformDensityMassProfile",
-)
+__all__ = ("UniformDensityMassProfile",)
 
 
 class UniformDensityMassProfile(MassProfile):
@@ -18,4 +16,4 @@ class UniformDensityMassProfile(MassProfile):
         self.r_s = r_s
 
     def __call__(self, r):
-        return (r/self.r_s)**3
+        return (r / self.r_s) ** 3

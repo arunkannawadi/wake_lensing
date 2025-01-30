@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import numpy as np
 
 __all__ = ("Region",)
+
 
 class ShapeProfile(ABC):
     """Abstract base class for different shapes."""
@@ -29,7 +29,11 @@ class Region(ABC):
         self.center = center
 
     def __repr__(self) -> str:
-        args = ", ".join(f"{key}={val}" for key, val in self.__dict__.items())
+        args = ", ".join(
+            f"{key}={val}"
+            for key, val in self.__dict__.items()
+            if not key.startswith("_")
+        )
         return f"{self.__class__.__name__}({args})"
 
     def __eq__(self, other) -> bool:

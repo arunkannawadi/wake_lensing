@@ -1,6 +1,6 @@
 from scipy.special import gammaincc
-from ._base_profile import MassProfile
 
+from ._base_profile import MassProfile
 
 __all__ = ["EinastoProfile"]
 
@@ -35,5 +35,5 @@ class EinastoProfile(MassProfile):
         self._n = value
 
     def __call__(self, r: float) -> float:
-        s = 2.*self.n
-        return gammaincc(3*self.n, s**1./self.n)
+        s = 2.0 * self.n
+        return gammaincc(3 * self.n, s**1.0 / self.n)

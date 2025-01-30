@@ -1,5 +1,6 @@
 import numpy as np
-from ._base_shape import Region
+
+from ._region import Region
 
 __all__ = ("Cone",)
 
@@ -24,7 +25,10 @@ class Cone(Region):
 
         # Check if point is in the infinite cone
         dot_product = np.dot(apex_to_point, axis_vector)
-        is_in = dot_product / (np.linalg.norm(apex_to_point) * np.linalg.norm(axis_vector)) > self.aperture_cos
+        is_in = (
+            dot_product / (np.linalg.norm(apex_to_point) * np.linalg.norm(axis_vector))
+            > self.aperture_cos
+        )
 
         if not is_in:
             return False

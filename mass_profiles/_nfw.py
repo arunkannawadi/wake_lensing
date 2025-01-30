@@ -1,9 +1,10 @@
+import math
+
 import numpy as np
+
 from . import MassProfile
 
-__all__ = (
-    "NFWProfile",
-)
+__all__ = ("NFWProfile",)
 
 
 class NFWProfile(MassProfile):
@@ -25,4 +26,4 @@ class NFWProfile(MassProfile):
         self.r_s = r_s
 
     def __call__(self, r) -> float:
-        return np.log10(1. + r/self.r_s) - r/(r + self.r_s)
+        return math.log10(1.0 + r / self.r_s) - r / (r + self.r_s)
