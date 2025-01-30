@@ -41,10 +41,6 @@ class RadialForce:
             r = (particle.x**2 + particle.y**2 + particle.z**2)**0.5
             a_r = -4 * np.pi * self.G * self.M * self.mass_profile(r) / r**3
 
-            particle.ax = a_r * particle.x
-            particle.ay = a_r * particle.y
-            particle.az = a_r * particle.z
-            
-
-
-
+            particle.ax += a_r * particle.x
+            particle.ay += a_r * particle.y
+            particle.az += a_r * particle.z
