@@ -41,6 +41,7 @@ def run_simulation_with_particles(
     n_particles, black_hole_distance=None, black_hole_approaching=False
 ):
     sim = rebound.Simulation()
+    sim.start_server(port=1234)
     sim.integrator = "ias15"
     sim.dt = 0.01  # Small timestep
     sim.ri_ias15.min_dt = 1e-6  # Minimum timestep
