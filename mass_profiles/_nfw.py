@@ -26,4 +26,4 @@ class NFWProfile(MassProfile):
         self.r_s = r_s
 
     def __call__(self, r) -> float:
-        return math.log10(1.0 + r / self.r_s) - r / (r + self.r_s)
+        return math.log(1.0 + r / self.r_s) - r / (r + self.r_s)
