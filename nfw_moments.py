@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+import os
+import numpy as np
+import rebound
+import matplotlib.pyplot as plt
+
+def calculate_means(positions):
+    """
+    Calculate the centroid (mean position) of a set of positions.
+    
+    Parameters
+    ----------
+    positions : numpy.ndarray
+        An (N,3) array of particle positions.
+        
+    Returns
+    -------
+    numpy.ndarray
+        A length-3 array with the mean x, y, and z.
+    """
+    return np.mean(positions, axis=0)
+
+def calculate_covariance_matrix(positions):
+    """
+    Calculate the covariance matrix (second moments) of a set of positions.
+    
+    Parameters
+    ----------
+    positions : numpy.ndarray
+        An (N,3) array of particle positions.
+        
+    Returns
+    -------
+    numpy.ndarray
+        The 3x3 covariance matrix.
+    """
+    # np.cov expects each row to be a variable (if rowvar=True) so we transpose.
+    return np.cov(positions.T)
+
+
+def in_cone(position, apex, direction, aperture_angle):
+    """
+    Check if a given position lies within a cone defined by its apex,
+    central axis (direction), and full opening angle.
+
+    Parameters
+    ----------
+    position : numpy.ndarray
+        The (x,y,z) coordinates of the particle.
+    apex : numpy.ndarray
+        The (x,y,z) coordinates of the cone apex.
+    direction : numpy.ndarray
+        A unit vector pointing along the central axis of the cone.
+    aperture_angle : float
+        The full opening angle of the cone (in radians).
+
+    Returns
+    -------
+    bool
+        True if the particle lies within the cone, False otherwise.
+    """
+    half_angle = aperture_angle / 2.0
+    vec = position - apex
+    norm = np.linalg.norm(vec)
+    # If the particle is exactly at the apex, count it as inside.
+    if norm == 0:
+        return True
+    cos_angle = np.dot(vec, direction) / (norm * np.linalg.norm(direction))
+    # Clip due to numerical issues.
+    angle = np.arccos(np.clip(cos_angle, -1.0, 1.0))
+    return angle < half_angle
+
+# ===========================================
+# Main analysis using REBOUND's binary archive
+# ===========================================
+
+# File produced by your simulation code
+archive_filename = "sim_nfw.bin"
+
+if not os.path.exists(archive_filename):
+    raise FileNotFoundError(f"Archive file {archive_filename} not found.")
+
+# Load the simulation archive.
+archive = rebound.Simulationarchive(archive_filename)
+
+# --------------
+# Final Snapshot Analysis
+# --------------
+
+# For example, pick the final snapshot for analysis.
+sim_final = archive[-1]
+print(f"Analyzing snapshot at simulation time t = {sim_final.t}")
+
+# Exclude the central massive particle (assumed to be at index 0)
+# and get positions for all test particles.
+positions = np.array([[p.x, p.y, p.z] for p in sim_final.particles[1:]])
+n_particles = len(positions)
+print(f"Number of test particles (excluding the central object): {n_particles}")
+
+# Calculate 3D moments for the final snapshot.
+mean_position = calculate_means(positions)
+covariance_matrix = calculate_covariance_matrix(positions)
+variances = np.diag(covariance_matrix)
+
+print("\n3D Distribution Analysis (Final Snapshot):")
+print(f"Mean position (centroid): {mean_position}")
+print("Covariance matrix:")
+print(covariance_matrix)
+print("Variances along x, y, z:", variances)
+
+if np.allclose(variances, variances[0], rtol=0.1):
+    print("\nThe distribution is approximately spherically symmetric.")
+else:
+    print("\nThe distribution deviates from spherical symmetry.")
+
+# Cone probability tests for the final snapshot.
+aperture_angle = 30 * np.pi / 180  # full opening angle in radians
+apex = np.array([0.0, 0.0, 0.0])
+# Left cone: central axis pointing in the negative x direction.
+left_direction = np.array([-1.0, 0.0, 0.0])
+left_direction /= np.linalg.norm(left_direction)
+# Right cone: central axis pointing in the positive x direction.
+right_direction = np.array([1.0, 0.0, 0.0])
+right_direction /= np.linalg.norm(right_direction)
+
+left_in_cone = [in_cone(pos, apex, left_direction, aperture_angle) for pos in positions]
+right_in_cone = [in_cone(pos, apex, right_direction, aperture_angle) for pos in positions]
+
+left_prob = np.mean(left_in_cone)
+right_prob = np.mean(right_in_cone)
+
+print(f"\nProbability of particles in the left cone: {left_prob:.3f}")
+print(f"Probability of particles in the right cone: {right_prob:.3f}")
+
+# Optional: Visualize the final snapshot positions.
+# fig = plt.figure(figsize=(8, 6))
+# ax = fig.add_subplot(111, projection='3d')
+# ax.scatter(positions[:, 0], positions[:, 1], positions[:, 2], s=5, c='b', alpha=0.5)
+# ax.set_xlabel('x')
+# ax.set_ylabel('y')
+# ax.set_zlabel('z')
+# ax.set_title('Test Particle Distribution (Final Snapshot)')
+# plt.show()
+
+# --------------
+# Moments Evolution Over Time
+# --------------
+
+# Prepare lists to store time series data.
+times = []
+centroid_list = []    # Each element is a 3-element array for (mean x, y, z)
+variance_list = []    # Each element is a 3-element array for variances along x, y, z
+
+# Loop over all snapshots in the archive.
+for sim in archive:
+    times.append(sim.t)
+    # Exclude the central object.
+    pos = np.array([[p.x, p.y, p.z] for p in sim.particles[1:]])
+    centroid_list.append(calculate_means(pos))
+    var_diag = np.diag(calculate_covariance_matrix(pos))
+    variance_list.append(var_diag)
+
+# Convert lists to numpy arrays.
+times = np.array(times)
+centroids = np.array(centroid_list)      # shape (num_snapshots, 3)
+variances_array = np.array(variance_list)  # shape (num_snapshots, 3)
+
+# Plot the evolution of the centroid.
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+
+ax1.plot(times, centroids[:, 0], label='Mean x')
+ax1.plot(times, centroids[:, 1], label='Mean y')
+ax1.plot(times, centroids[:, 2], label='Mean z')
+ax1.set_xlabel('Time')
+ax1.set_ylabel('Centroid Position')
+ax1.set_title('Evolution of the Centroid Over Time')
+ax1.legend()
+ax1.grid(True)
+
+# Plot the evolution of the variances.
+ax2.plot(times, variances_array[:, 0], label='Variance x')
+ax2.plot(times, variances_array[:, 1], label='Variance y')
+ax2.plot(times, variances_array[:, 2], label='Variance z')
+ax2.set_xlabel('Time')
+ax2.set_ylabel('Variance')
+ax2.set_title('Evolution of Variances Over Time')
+ax2.legend()
+ax2.grid(True)
+
+plt.tight_layout()
+plt.show()
