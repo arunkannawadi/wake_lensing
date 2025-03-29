@@ -55,14 +55,12 @@ def run_simulation_with_particles(
     G = sim.G
     sim.start_server(port=1234)
     sim.integrator = "whfast"
-    sim.dt = 1e-1  # Small timestep
+    sim.dt = 1e-3  # Small timestep
     sim.ri_ias15.min_dt = 0  # 2e-16  # Minimum timestep
 
     # Add an SMBH at the center of the halo.
     sim.add(m=(4.3 * 1e6 * u.Msun).to_value(sim.units["mass"].capitalize()))
     c = 20.0  # Concentration parameter
-    # Add the massive stationary particle at the center
-    # sim.add(m=M)  # Central mass
 
     # Add multiple small particles with random initial conditions
     orbital_periods = []
@@ -133,6 +131,8 @@ def run_simulation_with_particles(
     our_mass = halo_mass.to_value(sim.units["mass"].capitalize()) * h
     our_mass /= np.log(1.0 + c) - c / (1.0 + c)
 
+    sim.add(m=(4.3 * 1e5 * u.Msun).to_value(sim.units["mass"].capitalize()), x=100)
+
     radial_force = RadialForce(M=our_mass)
     radial_force.G = sim.G
     r_s = 1.0 * u.kpc  # Scale radius of the Milky Way NFW profile.
@@ -171,7 +171,7 @@ def run_simulation_with_particles(
 start_time = time.time()
 
 # Running the simulation with 100 particles
-n_particles = 5**3
+n_particles = 2
 
 run_simulation_with_particles(n_particles, black_hole_distance=None)
 print("Running simulation with black hole infinitely far")
