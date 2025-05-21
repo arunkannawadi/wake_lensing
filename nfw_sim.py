@@ -31,7 +31,7 @@ Msol = None
 h = (
     halotools.sim_manager.sim_defaults.cosmology.default_cosmology.get().h
 )  # Reduced Hubble constant
-halo_mass = (1e5 / h) * u.Msun  # Mass of the dark matter halo in solar masses/h.
+halo_mass = (1e5 / h) * u.Msun # Mass of the dark matter halo in solar masses/h.
 
 # Create the output folder if it doesn't exist
 os.makedirs(output_folder, exist_ok=True)
@@ -55,11 +55,13 @@ def run_simulation_with_particles(
     G = sim.G
     sim.start_server(port=1234)
     sim.integrator = "whfast"
+    sim.move_to_com()
     sim.dt = 1e-3  # Small timestep
     sim.ri_ias15.min_dt = 0  # 2e-16  # Minimum timestep
 
     # Add an SMBH at the center of the halo.
-    sim.add(m=(4.3 * 1e6 * u.Msun).to_value(sim.units["mass"].capitalize()))
+    cmass=(4.3 * 1e6 * u.Msun).to_value(sim.units["mass"].capitalize())
+    sim.add(m=cmass)
     c = 20.0  # Concentration parameter
 
     # Add multiple small particles with random initial conditions
@@ -130,8 +132,12 @@ def run_simulation_with_particles(
     # Add the additional force to the simulation
     our_mass = halo_mass.to_value(sim.units["mass"].capitalize()) * h
     our_mass /= np.log(1.0 + c) - c / (1.0 + c)
+    
+    r=100
+    v_circ = 10
 
-    sim.add(m=(4.3 * 1e5 * u.Msun).to_value(sim.units["mass"].capitalize()), x=100)
+    
+    sim.add(m=(4.3 * 1e5 *0 * u.Msun).to_value(sim.units["mass"].capitalize()), x=r, vy=v_circ)
 
     radial_force = RadialForce(M=our_mass)
     radial_force.G = sim.G
@@ -147,7 +153,7 @@ def run_simulation_with_particles(
     # Store the data for all particles and timesteps
     output_data = []
 
-    sim.save_to_file("sim_nfw.bin", interval=0.1)
+    sim.save_to_file("sim_nfw2.bin", interval=0.1)
     sim.integrate(total_time)
 
     # writeout_interval = 10.
@@ -171,7 +177,7 @@ def run_simulation_with_particles(
 start_time = time.time()
 
 # Running the simulation with 100 particles
-n_particles = 2
+n_particles = 100
 
 run_simulation_with_particles(n_particles, black_hole_distance=None)
 print("Running simulation with black hole infinitely far")
