@@ -53,7 +53,7 @@ def in_cone(position, apex, direction, aperture_angle):
         A unit vector pointing along the central axis of the cone.
     aperture_angle : float
         The full opening angle of the cone (in radians).
-    
+
     Returns
     -------
     bool
@@ -87,8 +87,32 @@ def compute_angular_momentum(particles):
         L += p.m * np.cross(r, v)
     return L
 
+def compute_kinetic_energy(particles):
+    """Compute the total kinetic energy of the system."""
+    K = 0.0
+    for p in particles:
+        v2 = p.vx**2 + p.vy**2 + p.vz**2
+        K += 0.5 * p.m * v2
+    return K
+
+def compute_potential_energy(particles, G):
+    """Compute the total gravitational potential energy of the system.
+    Note: This double-loop sums over each unique pair.
+    """
+    U = 0.0
+    N = len(particles)
+    for i in range(N):
+        for j in range(i+1, N):
+            dx = particles[i].x - particles[j].x
+            dy = particles[i].y - particles[j].y
+            dz = particles[i].z - particles[j].z
+            r = np.sqrt(dx**2 + dy**2 + dz**2)
+            if r != 0:
+                U += -G * particles[i].m * particles[j].m / r
+    return U
+
 # File produced by simulation code
-archive_filename = "sim_nfw.bin"
+archive_filename = "sim_nfw_one_blackhole.bin"
 
 if not os.path.exists(archive_filename):
     raise FileNotFoundError(f"Archive file {archive_filename} not found.")
@@ -216,6 +240,56 @@ plt.plot(times, angular_momenta[:, 2], label='Angular Momentum Lz')
 plt.xlabel('Time')
 plt.ylabel('Angular Momentum (simulation units)')
 plt.title('Angular Momentum Evolution Over Time')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# 3. Kinetic, Potential, and Total Energy Evolution
+# Reload the archive to ensure we iterate over all snapshots again.
+archive_energy = rebound.Simulationarchive(archive_filename)
+kinetic_energies = []
+potential_energies = []
+total_energies = []
+times_energy = []
+for sim in archive_energy:
+    times_energy.append(sim.t)
+    ke = compute_kinetic_energy(sim.particles)
+    pe = compute_potential_energy(sim.particles, sim.G)
+    kinetic_energies.append(ke)
+    potential_energies.append(pe)
+    total_energies.append(ke + pe)
+
+times_energy = np.array(times_energy)
+kinetic_energies = np.array(kinetic_energies)
+potential_energies = np.array(potential_energies)
+total_energies = np.array(total_energies)
+
+# Plot Kinetic Energy Evolution
+plt.figure(figsize=(8, 6))
+plt.plot(times_energy, kinetic_energies, label='Kinetic Energy')
+plt.xlabel('Time')
+plt.ylabel('Kinetic Energy')
+plt.title('Kinetic Energy Evolution Over Time')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Plot Potential Energy Evolution
+plt.figure(figsize=(8, 6))
+plt.plot(times_energy, potential_energies, label='Potential Energy', color='orange')
+plt.xlabel('Time')
+plt.ylabel('Potential Energy')
+plt.title('Potential Energy Evolution Over Time')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Plot Total Energy Evolution
+plt.figure(figsize=(8, 6))
+plt.plot(times_energy, total_energies, label='Total Energy', color='green')
+plt.xlabel('Time')
+plt.ylabel('Total Energy')
+plt.title('Total Energy Evolution Over Time')
 plt.legend()
 plt.grid(True)
 plt.show()
