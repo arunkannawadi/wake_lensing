@@ -1,8 +1,11 @@
-import numpy as np
 import os
 import sys
+
+import numpy as np
+
 sys.path.append("/path/to/Physics")
 from probability_profiles import Cone
+
 from calculate_probabilities import ProbabilityCalculator
 
 # Parameters
@@ -16,14 +19,20 @@ cone_apex_right = cone_apex_left
 cone_base_right = np.array([1, 0, 0])  # 1 unit along the x-axis for the base center
 
 # Create Cone objects for the left and right cones
-left_cone = Cone(apex=cone_apex_left, base=cone_base_left, aperture_angle=aperture_angle)
-right_cone = Cone(apex=cone_apex_right, base=cone_base_right, aperture_angle=aperture_angle)
+left_cone = Cone(
+    apex=cone_apex_left, base=cone_base_left, aperture_angle=aperture_angle
+)
+right_cone = Cone(
+    apex=cone_apex_right, base=cone_base_right, aperture_angle=aperture_angle
+)
 
 # File path for simulation data
 output_file = os.path.join(output_folder, "combined_simulation_with_black_hole.txt")
 
 # Calculate probabilities and 3D moments from the output file
-left_probs, right_probs, all_positions = ProbabilityCalculator.calculate(output_file, left_cone, right_cone)
+left_probs, right_probs, all_positions = ProbabilityCalculator.calculate(
+    output_file, left_cone, right_cone
+)
 
 # Calculate average probabilities
 average_left_prob = np.mean(left_probs)
@@ -33,9 +42,11 @@ average_right_prob = np.mean(right_probs)
 print(f"Average probability of particles in left cone: {average_left_prob:.3f}")
 print(f"Average probability of particles in right cone: {average_right_prob:.3f}")
 
+
 # Function to calculate the mean position of particles (centroid)
 def calculate_means(positions):
     return np.mean(positions, axis=0)  # Mean x, y, z for all particles
+
 
 # Function to calculate the covariance matrix (second moments)
 def calculate_covariance_matrix(positions):
@@ -43,6 +54,8 @@ def calculate_covariance_matrix(positions):
     centered_positions = positions - mean_position
     covariance_matrix = np.cov(centered_positions, rowvar=False)
     return covariance_matrix
+
+
 """
 # Calculate and output 3D moments
 mean_position = calculate_means(all_positions)
@@ -63,8 +76,8 @@ if spherical_symmetry:
 else:
     print("The distribution deviates from spherical symmetry.")
 """
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # Step 1: Load the data
 file_path = output_file  # Replace with your file path
@@ -85,25 +98,25 @@ anisotropy = []
 for time_step, group in grouped:
     x = group["x"].values
     y = group["y"].values
-    
+
     # Compute mean and standard deviation
     mean_x = np.mean(x)
     mean_y = np.mean(y)
     std_x = np.std(x)
     std_y = np.std(y)
-    
+
     # Standardize the coordinates
     x_std = (x - mean_x) / std_x
     y_std = (y - mean_y) / std_y
-    
+
     # Compute second moments using standardized coordinates
     x2 = np.mean(x_std**2)
     y2 = np.mean(y_std**2)
     xy = np.mean(x_std * y_std)
-    
+
     # Anisotropy
     anisotropy_value = x2 - y2
-    
+
     # Store results
     time_steps.append(time_step)
     moment_xy.append(xy)

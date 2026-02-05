@@ -1,7 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import os
+
+import matplotlib.pyplot as plt
+import numpy as np
 from probability_profiles import Cone
+
 from calculate_probabilities import ProbabilityCalculator
 
 # Parameters
@@ -15,15 +17,19 @@ cone_apex_right = cone_apex_left
 cone_base_right = np.array([1, 0, 0])  # 1 unit along the x-axis for the base center
 
 # Create Cone objects for the left and right cones
-left_cone = Cone(apex=cone_apex_left, base=cone_base_left, aperture_angle=aperture_angle)
-right_cone = Cone(apex=cone_apex_right, base=cone_base_right, aperture_angle=aperture_angle)
+left_cone = Cone(
+    apex=cone_apex_left, base=cone_base_left, aperture_angle=aperture_angle
+)
+right_cone = Cone(
+    apex=cone_apex_right, base=cone_base_right, aperture_angle=aperture_angle
+)
 
 # File path for simulation data
 output_file = os.path.join(output_folder, "combined_simulation.txt")
 
 # Load data with error handling
 try:
-    data = np.loadtxt(output_file, delimiter=',', skiprows=1)
+    data = np.loadtxt(output_file, delimiter=",", skiprows=1)
 except Exception as e:
     print(f"Error loading data from file: {e}")
     exit()

@@ -1,15 +1,14 @@
 """Collection of radial forces that can be used in rebound simulations."""
 
 from typing import TYPE_CHECKING
+
 import numpy as np
 
 if TYPE_CHECKING:
     from .mass_profiles import MassProfile
 
 
-__all__ = (
-    "RadialForce",
-)
+__all__ = ("RadialForce",)
 
 
 class RadialForce:
@@ -38,8 +37,8 @@ class RadialForce:
 
         ps = reb_sim.contents.particles  # Access particles via reb_sim.contents
         for particle in ps[1:]:
-            r = (particle.x**2 + particle.y**2 + particle.z**2)**0.5
-            a_r = -4 * np.pi * self.G * self.M * self.mass_profile(r) / r**3
+            r = (particle.x**2 + particle.y**2 + particle.z**2) ** 0.5
+            a_r = -self.G * self.M * self.mass_profile(r) / r**3
 
             particle.ax += a_r * particle.x
             particle.ay += a_r * particle.y
